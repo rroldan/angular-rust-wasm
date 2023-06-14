@@ -15,7 +15,7 @@ export class AppComponent {
     this.calc();
   }
 
-  async calc() {
+  calc() {
     this.total = add(1, 1);
     }
 }
