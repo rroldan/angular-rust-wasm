@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { add } from 'wasm-lib/pkg/wasm_lib_bg.wasm'
 import { AppService } from './app.service';
 
 @Component({
