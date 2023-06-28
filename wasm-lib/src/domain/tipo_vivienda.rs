@@ -8,10 +8,18 @@ pub enum Tipo {
     Chalet
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TipoViviendaId(Option<String>);
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TipoViviendaCalle(Option<String>);
+
+
+
 #[derive(Debug, Deserialize,Serialize,Clone)]
 pub struct TipoVivienda {
-    pub id: String,
-    pub calle: String,
+    pub id: TipoViviendaId,
+    pub calle: TipoViviendaCalle,
     pub numero: i32,
     pub piso: String,
     pub codigo_postal: String,
@@ -21,13 +29,62 @@ pub struct TipoVivienda {
     pub tipo: Tipo
 }
 
-impl TipoVivienda {
-    pub fn new(id: String, calle: String, numero:i32, piso:String, codigo_postal:String, metros_cuadrados:i32, numero_aseos:i32,numero_habitaciones:i32,tipo:Tipo) -> Self {
+impl TipoViviendaId {
+    pub fn value(&self) -> &Option<String> {
+        &self.0
+    }
+}
 
-        Self {
-            id, calle, numero, piso, codigo_postal, metros_cuadrados, numero_aseos,numero_habitaciones,tipo
+impl TryFrom<String> for TipoViviendaId {
+    type Error = &'static str;
+
+    fn try_from(id: String) -> Result<Self, Self::Error> {
+        if id.is_empty() {
+            Ok(Self(None))
+        } else {
+            Ok(Self(Some(id)))
         }
     }
+}
+
+impl TipoViviendaCalle {
+    pub fn value(&self) -> &Option<String> {
+        &self.0
+    }
+}
+
+impl TryFrom<String> for TipoViviendaCalle {
+    type Error = &'static str;
+
+    fn try_from(id: String) -> Result<Self, Self::Error> {
+        if id.is_empty() {
+            Err("Calle no puede estar vacia")
+        } else {
+            Ok(Self(Some(id)))
+        }
+    }
+}
+impl TipoVivienda {
+    pub fn new(id: String, calle: String, numero:i32, piso:String, codigo_postal:String, metros_cuadrados:i32, numero_aseos:i32,numero_habitaciones:i32,tipo:Tipo) -> Result<TipoVivienda, String> {
+        let tipo_vivienda_id = TipoViviendaId::try_from(id)?;
+        let tipo_vivienda_calle = TipoViviendaCalle::try_from(calle)?;
+        
+        
+        Ok(Self {
+            id:tipo_vivienda_id, 
+            calle:tipo_vivienda_calle, numero, piso, codigo_postal, metros_cuadrados, numero_aseos,numero_habitaciones,tipo
+        })
+    }
+
+    pub fn id(&self) -> &TipoViviendaId {
+        &self.id
+    }
+
+    pub fn calle(&self) -> &TipoViviendaCalle {
+        &self.calle
+    }
+
+
 }
 
 mod tests {
@@ -54,10 +111,10 @@ mod tests {
             TIPO_VIVIENDA_METROS_CUADRADOS,
             TIPO_VIVIENDA_NUMERO_ASEOS,
             TIPO_VIVIENDA_NUMERO_HABITACIONES,
-            TIPO_VIVIENDA_TIPO);
+            TIPO_VIVIENDA_TIPO).unwrap();
 
-        assert_eq!(tipo_vivienda.id, TIPO_VIVIENDA_ID);
-        assert_eq!(tipo_vivienda.calle, TIPO_VIVIENDA_CALLE);
+        assert_eq!(tipo_vivienda.id().value().as_ref().unwrap(), TIPO_VIVIENDA_ID);
+        assert_eq!(tipo_vivienda.calle().value().as_ref().unwrap(), TIPO_VIVIENDA_CALLE);
         assert_eq!(tipo_vivienda.numero, TIPO_VIVIENDA_NUMERO);
         assert_eq!(tipo_vivienda.piso, TIPO_VIVIENDA_PISO);
         assert_eq!(tipo_vivienda.codigo_postal, TIPO_VIVIENDA_CODIGO_POSTAL);
@@ -65,5 +122,24 @@ mod tests {
         assert_eq!(tipo_vivienda.numero_aseos, TIPO_VIVIENDA_NUMERO_ASEOS);
         assert_eq!(tipo_vivienda.numero_habitaciones, TIPO_VIVIENDA_NUMERO_HABITACIONES);
         assert_eq!(tipo_vivienda.tipo, TIPO_VIVIENDA_TIPO);
+    }
+
+    #[test]
+    fn should_fail_without_a_calle_or_tipo_vivienda() {
+
+        let err_tipo_vivienda = TipoVivienda::new ( 
+            TIPO_VIVIENDA_ID.to_string(),
+        "".to_string(),
+            TIPO_VIVIENDA_NUMERO,
+            TIPO_VIVIENDA_PISO.to_string(),
+            TIPO_VIVIENDA_CODIGO_POSTAL.to_string(),
+            TIPO_VIVIENDA_METROS_CUADRADOS,
+            TIPO_VIVIENDA_NUMERO_ASEOS,
+            TIPO_VIVIENDA_NUMERO_HABITACIONES,
+            TIPO_VIVIENDA_TIPO);
+
+
+        assert_eq!(err_tipo_vivienda.is_err(), true);
+        assert_eq!(err_tipo_vivienda.unwrap_err(), "Calle no puede estar vacia");
     }
 }
