@@ -1,22 +1,23 @@
 
 use serde::{Deserialize, Serialize};
+use crate::domain::Entity;
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone, Hash, Eq, PartialEq)]
 pub enum Tipo {
     Apartamento,
     Casa,
     Chalet
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Hash, Eq, PartialEq)]
 pub struct TipoViviendaId(Option<String>);
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Hash, Eq, PartialEq)]
 pub struct TipoViviendaCalle(Option<String>);
 
 
 
-#[derive(Debug, Deserialize,Serialize,Clone)]
+#[derive(Debug, Deserialize,Serialize,Clone, Hash, Eq, PartialEq)]
 pub struct TipoVivienda {
     pub id: TipoViviendaId,
     pub calle: TipoViviendaCalle,
@@ -28,6 +29,8 @@ pub struct TipoVivienda {
     pub numero_habitaciones: i32,
     pub tipo: Tipo
 }
+
+impl Entity for TipoVivienda {}
 
 impl TipoViviendaId {
     pub fn value(&self) -> &Option<String> {
